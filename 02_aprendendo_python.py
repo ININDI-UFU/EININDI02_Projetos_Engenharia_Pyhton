@@ -1,7 +1,7 @@
 from numpy import cos, sin, pi, arange
 from pylab import show, figure, plot, title, legend
 
-T = 20
+T:int = 20.0
 t = arange(0,100,0.1)
 y1 = cos((2*pi*(1/T))*t)
 y2 = sin(2*pi*(1/T)*t)
