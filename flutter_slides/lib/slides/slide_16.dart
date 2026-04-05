@@ -3,6 +3,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_code_editor/flutter_code_editor.dart';
+import 'package:flutter_highlight/themes/vs2015.dart';
+import 'package:highlight/languages/python.dart';
 
 // ── JS interop declarations ───────────────────────────────────────────────────
 
@@ -35,7 +38,7 @@ class Slide16 extends StatefulWidget {
 
 class _Slide16State extends State<Slide16> with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
-  late final TextEditingController _codeCtrl;
+  late final CodeController _codeCtrl;
   late final ScrollController _outputScroll;
 
   Timer? _pollTimer;
@@ -44,6 +47,7 @@ class _Slide16State extends State<Slide16> with SingleTickerProviderStateMixin {
   bool _hasOutput = false;
   bool _hasError = false;
   bool _editorFullscreen = false;
+  bool _outputFullscreen = false;
   String _output = '';
 
   // ── Código pré-carregado (notebook 05_projeto_condicionador_sinais) ────────
@@ -165,7 +169,10 @@ else:
       duration: const Duration(milliseconds: 900),
     )..forward();
     final saved = _lsGet('slide16_code'.toJS)?.toDart;
-    _codeCtrl = TextEditingController(text: saved ?? _sample);
+    _codeCtrl = CodeController(
+      text: saved ?? _sample,
+      language: python,
+    );
     _outputScroll = ScrollController();
     _startPyodidePoll();
   }
@@ -233,14 +240,14 @@ else:
     });
 
     // Persist current code so it survives page reloads
-    _lsSet('slide16_code'.toJS, _codeCtrl.text.toJS);
+    _lsSet('slide16_code'.toJS, _codeCtrl.fullText.toJS);
 
     // Let Flutter redraw the "Executando..." state before blocking
     await Future.delayed(const Duration(milliseconds: 60));
 
     try {
       // Await the async JS work (loads packages + runs code)
-      await _runPythonCode(_codeCtrl.text.toJS).toDart;
+      await _runPythonCode(_codeCtrl.fullText.toJS).toDart;
       // Result is stored in window._pyResult — read it synchronously
       final raw = _getPyResult()?.toDart ?? '{"success":false,"output":"Sem resultado"}';
       final Map<String, dynamic> json = jsonDecode(raw);
@@ -333,6 +340,34 @@ else:
                           padding: EdgeInsets.fromLTRB(
                               36 * s, 22 * s, 36 * s, 14 * s),
                           child: _buildEditor(s),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              // ── Fullscreen output overlay ───────────────────────────────
+              if (_outputFullscreen)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF060E18),
+                          Color(0xFF040D18),
+                          Color(0xFF020A12),
+                        ],
+                      ),
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CustomPaint(painter: _DotGrid(s: s)),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              36 * s, 22 * s, 36 * s, 14 * s),
+                          child: _buildOutput(s),
                         ),
                       ],
                     ),
@@ -464,7 +499,7 @@ else:
   Widget _buildEditor(double s) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1B2A),
+        color: const Color(0xFF1E1E1E),
         border: Border.all(
           color: const Color(0xFF00C7FF).withValues(alpha: 0.30),
         ),
@@ -489,7 +524,7 @@ else:
                   ),
                   tooltip: 'Copiar código',
                   onPressed: () =>
-                      Clipboard.setData(ClipboardData(text: _codeCtrl.text)),
+                      Clipboard.setData(ClipboardData(text: _codeCtrl.fullText)),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(minWidth: 26 * s, minHeight: 26 * s),
                 ),
@@ -510,30 +545,26 @@ else:
               ],
             ),
           ),
-          // Text field
+          // Code editor with Python syntax highlighting (VS Code dark theme)
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14 * s, 10 * s, 14 * s, 8 * s),
-              child: TextField(
+            child: CodeTheme(
+              data: CodeThemeData(styles: vs2015Theme),
+              child: CodeField(
                 controller: _codeCtrl,
-                maxLines: null,
                 expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                style: TextStyle(
+                background: const Color(0xFF1E1E1E),
+                textStyle: TextStyle(
                   fontFamily: 'monospace',
                   fontSize: 11.5 * s,
-                  color: const Color(0xFFE2E8F0),
                   height: 1.65,
                 ),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  hintText: 'Digite seu código Python aqui...',
-                  hintStyle: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 11.5 * s,
-                    color: Colors.white24,
-                  ),
+                padding: EdgeInsets.fromLTRB(4 * s, 10 * s, 14 * s, 8 * s),
+                gutterStyle: GutterStyle(
+                  width: 44 * s,
+                  background: const Color(0xFF161616),
+                  textStyle: TextStyle(color: Colors.white38),
+                  showErrors: false,
+                  showFoldingHandles: true,
                 ),
               ),
             ),
@@ -633,8 +664,11 @@ else:
             label: _hasError ? 'ERRO' : 'SAÍDA',
             color: borderColor,
             s: s,
-            trailing: _hasOutput
-                ? IconButton(
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_hasOutput)
+                  IconButton(
                     icon: Icon(
                       Icons.cleaning_services_rounded,
                       color: Colors.white38,
@@ -651,8 +685,23 @@ else:
                       minWidth: 26 * s,
                       minHeight: 26 * s,
                     ),
-                  )
-                : null,
+                  ),
+                IconButton(
+                  icon: Icon(
+                    _outputFullscreen
+                        ? Icons.fullscreen_exit_rounded
+                        : Icons.fullscreen_rounded,
+                    color: Colors.white54,
+                    size: 16 * s,
+                  ),
+                  tooltip: _outputFullscreen ? 'Restaurar tamanho' : 'Expandir saída',
+                  onPressed: () =>
+                      setState(() => _outputFullscreen = !_outputFullscreen),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(minWidth: 26 * s, minHeight: 26 * s),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: _hasOutput

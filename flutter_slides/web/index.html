@@ -75,9 +75,10 @@
         // Carrega pacotes necessários ANTES de redirecionar stdout
         await window._pyodide.loadPackagesFromImports(code);
 
-        // Redirecionar stdout e stderr para um buffer único
+        // Redirecionar stdout/stderr e suprimir DeprecationWarnings
         window._pyodide.runPython(`
-import sys as __sys, io as __io
+import sys as __sys, io as __io, warnings as __warnings
+__warnings.filterwarnings('ignore', category=DeprecationWarning)
 __buf = __io.StringIO()
 __sys.stdout = __buf
 __sys.stderr = __buf
