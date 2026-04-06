@@ -81,6 +81,20 @@
 import matplotlib as __mpl
 __mpl.use('agg')
 import matplotlib.pyplot as __plt
+# Tema escuro: texto claro para fundo escuro
+__mpl.rcParams.update({
+    'text.color':       '#E0E0E0',
+    'axes.labelcolor':  '#E0E0E0',
+    'axes.edgecolor':   '#445566',
+    'axes.facecolor':   '#0C1B30',
+    'figure.facecolor': '#0C1B30',
+    'xtick.color':      '#AABBCC',
+    'ytick.color':      '#AABBCC',
+    'legend.facecolor': '#142640',
+    'legend.edgecolor': '#334455',
+    'legend.labelcolor': '#E0E0E0',
+    'grid.color':       '#1E3854',
+})
 # Substituir show() para não abrir janela interativa
 __plt.show = lambda *a, **kw: None
 `);

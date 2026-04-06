@@ -59,17 +59,17 @@ const _kArrowColors = [
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
-class Slide02 extends StatefulWidget {
+class Slide03 extends StatefulWidget {
   /// 0 = title/sub visible, chain empty.
   /// 1-5 = blocks revealed one by one; 5 also shows info box.
   final int step;
-  const Slide02({super.key, this.step = 0});
+  const Slide03({super.key, this.step = 0});
 
   @override
-  State<Slide02> createState() => _Slide02State();
+  State<Slide03> createState() => _Slide03State();
 }
 
-class _Slide02State extends State<Slide02> with TickerProviderStateMixin {
+class _Slide03State extends State<Slide03> with TickerProviderStateMixin {
   late final AnimationController _entry;
   late final AnimationController _pulse;
 

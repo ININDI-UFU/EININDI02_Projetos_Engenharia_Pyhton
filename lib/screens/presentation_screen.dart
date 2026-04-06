@@ -62,23 +62,24 @@ class PresentationScreen extends StatefulWidget {
 }
 
 // Max sub-steps per slide index (0 = no sub-steps).
-// Ordem: 0=Slide01, 1=Slide02, 2=Slide03, ...
+// Ordem: 0=Slide01(capa), 1=Slide02(Python), 2=Slide03, ...
 int _maxSubStep(int slide) {
   const steps = {
-    1: 5, // Cadeia de Medição
-    2: 3, // Contexto do Problema
-    3: 3, // Formulação do Problema
-    4: 2, // Esquemático
-    5: 4, // Derivação Matemática
-    6: 4, // Estratégia Computacional
-    7: 0, // Fluxograma
-    8: 3, // Arquitetura do Software
-    9: 2, // Série E24
-    10: 2, // Implementação Python
-    11: 2, // Funções Auxiliares
-    12: 2, // Busca Aleatória
-    13: 2, // Análise Resultados
-    14: 2, // Segurança Elétrica
+    // 1: 0, // Slide02 — Python interativo (sem sub-steps)
+    2: 5, // Slide03 — Cadeia de Medição
+    3: 3, // Slide04 — Contexto do Problema
+    4: 3, // Slide05 — Formulação do Problema
+    5: 2, // Slide06 — Esquemático
+    6: 4, // Slide07 — Derivação Matemática
+    7: 4, // Slide08 — Estratégia Computacional
+    8: 0, // Slide09 — Fluxograma
+    9: 3, // Slide10 — Arquitetura do Software
+    10: 2, // Slide11 — Série E24
+    11: 2, // Slide12 — Implementação Python
+    12: 2, // Slide13 — Funções Auxiliares
+    13: 2, // Slide14 — Busca Aleatória
+    14: 2, // Slide15 — Análise Resultados
+    15: 2, // Slide16 — Segurança Elétrica
   };
   return steps[slide] ?? 0;
 }
@@ -556,7 +557,7 @@ class _SlideFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (slideIndex == 0) return const Slide01();
-    if (slideIndex == 1) return Slide02(step: subStep);
+    if (slideIndex == 1) return const Slide02(); // Python interativo
     if (slideIndex == 2) return Slide03(step: subStep);
     if (slideIndex == 3) return Slide04(step: subStep);
     if (slideIndex == 4) return Slide05(step: subStep);
@@ -570,8 +571,8 @@ class _SlideFrame extends StatelessWidget {
     if (slideIndex == 12) return Slide13(step: subStep);
     if (slideIndex == 13) return Slide14(step: subStep);
     if (slideIndex == 14) return Slide15(step: subStep);
-    if (slideIndex == 15) return const Slide16();
-    if (slideIndex == 16) return const Slide17(); // Python interativo (último)
+    if (slideIndex == 15) return Slide16(step: subStep);
+    if (slideIndex == 16) return const Slide17();
     final path =
         'assets/pdf_slide_${(slideIndex + 1).toString().padLeft(2, '0')}.png';
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Slide07 extends StatefulWidget {
+class Slide08 extends StatefulWidget {
   final int step;
-  const Slide07({super.key, required this.step});
+  const Slide08({super.key, required this.step});
   @override
-  State<Slide07> createState() => _Slide07State();
+  State<Slide08> createState() => _Slide08State();
 }
 
-class _Slide07State extends State<Slide07> with SingleTickerProviderStateMixin {
+class _Slide08State extends State<Slide08> with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
 
   @override

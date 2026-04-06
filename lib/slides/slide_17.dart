@@ -23,14 +23,14 @@ external JSString? _getPyResult();
 // Permite executar código Python diretamente no browser.
 // ─────────────────────────────────────────────────────────────────────────────
 
-class Slide16 extends StatefulWidget {
-  const Slide16({super.key});
+class Slide17 extends StatefulWidget {
+  const Slide17({super.key});
 
   @override
-  State<Slide16> createState() => _Slide16State();
+  State<Slide17> createState() => _Slide17State();
 }
 
-class _Slide16State extends State<Slide16> with SingleTickerProviderStateMixin {
+class _Slide17State extends State<Slide17> with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
   late final CodeController _codeCtrl;
   late final ScrollController _outputScroll;
