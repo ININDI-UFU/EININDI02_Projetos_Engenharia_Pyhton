@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 
 class Slide06 extends StatefulWidget {
   final int step;
@@ -70,7 +71,9 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
     required String label,
     required String desc,
     required String formula,
-    required String additional,
+    String? desc2,
+    String? formula2,
+    String? additional,
     Color? additionalColor,
   }) {
     return _reveal(
@@ -145,26 +148,67 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
                   width: 1,
                 ),
               ),
-              child: Text(
-                formula,
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  color: const Color(0xFF00BCD4),
-                  fontSize: 11 * s,
-                  fontWeight: FontWeight.bold,
+              child: Center(
+                child: Math.tex(
+                  formula,
+                  textStyle: TextStyle(
+                    color: const Color(0xFF00BCD4),
+                    fontSize: 13 * s,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(height: 6 * s),
-            Text(
-              additional,
-              style: TextStyle(
-                color: additionalColor ?? Colors.white.withValues(alpha: 0.7),
-                fontSize: 9.5 * s,
-                fontStyle: FontStyle.italic,
+            if (desc2 != null) ...[
+              SizedBox(height: 6 * s),
+              Text(
+                desc2,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 10 * s,
+                  height: 1.4,
+                ),
               ),
-            ),
+            ],
+            if (formula2 != null) ...[
+              SizedBox(height: 6 * s),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12 * s,
+                  vertical: 6 * s,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0x330A1E38),
+                  borderRadius: BorderRadius.circular(6 * s),
+                  border: Border.all(
+                    color: const Color(0xFF00BCD4).withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Math.tex(
+                    formula2,
+                    textStyle: TextStyle(
+                      color: const Color(0xFF00BCD4),
+                      fontSize: 13 * s,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (additional != null) ...[
+              SizedBox(height: 6 * s),
+              Text(
+                additional,
+                style: TextStyle(
+                  color: additionalColor ?? Colors.white.withValues(alpha: 0.7),
+                  fontSize: 9.5 * s,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -228,7 +272,8 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
                                     label: 'ETAPA 1: CONVERSÃO RMS → PICO',
                                     desc:
                                         'O valor RMS é o valor eficaz da tensão CA senoidal. Para obter o valor de pico:',
-                                    formula: 'V_pico = V_RMS × √2',
+                                    formula:
+                                        r'\mathbf{V}_{\text{pico}} = \mathbf{V}_{\text{RMS}} \times \sqrt{2}',
                                     additional: '220 × 1,4142 ≈ 311,13 V',
                                     additionalColor: const Color(0xFF00BCD4),
                                   ),
@@ -242,9 +287,13 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
                                     label:
                                         'ETAPA 2: GANHO CA — DIVISOR DE TENSÃO',
                                     desc:
-                                        'Para o sinal CA, Vcc é curto-circuito. R1 e R2 ficam em paralelo:',
-                                    formula: 'R1‖R2 = (R1 × R2) / (R1 + R2)',
-                                    additional: 'G_CA = R1‖R2 / (R3 + R1‖R2)',
+                                        'Para o sinal CA, Vcc é curto-circuito (fonte ideal). R1 e R2 ficam em paralelo:',
+                                    formula:
+                                        r'\mathbf{R1 \| R2} = (R1 \times R2) \,/\, (R1 + R2)',
+                                    desc2:
+                                        'O ganho CA real do divisor R3 + (R1‖R2):',
+                                    formula2:
+                                        r'\mathbf{G}_{\text{CA}} = R1\|R2 \,/\, (R3 + R1\|R2)',
                                   ),
                                 ),
                               ],
@@ -262,11 +311,11 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
                                     labelColor: Colors.green,
                                     label: 'ETAPA 3: OFFSET CC — NÍVEL DC',
                                     desc:
-                                        'Para CC, a entrada CA é zero. O offset vem de Vcc através de R1:',
+                                        'Para CC, a entrada CA é zero. O offset vem de Vcc através de R1. R3 e R2 ficam em paralelo vistos de R1:',
                                     formula:
-                                        'V_CC = [R3‖R2 / (R1 + R3‖R2)] × Vcc',
+                                        r'\mathbf{V}_{\text{cc}} = [R3\|R2 \,/\, (R1 + R3\|R2)] \times Vcc',
                                     additional:
-                                        'Este nível DC desloca a senoide para que o vale fique próximo de 0V.',
+                                        'Este nível DC desloca a senóide para que o vale fique próximo de 0V.',
                                   ),
                                 ),
                                 Expanded(
@@ -278,9 +327,10 @@ class _Slide06State extends State<Slide06> with SingleTickerProviderStateMixin {
                                     label: 'ETAPA 4: SAÍDA FINAL COMBINADA',
                                     desc:
                                         'Superposição: somamos a componente CA atenuada com o offset CC:',
-                                    formula: 'V_out = V_CC + G_CA × V_pico',
+                                    formula:
+                                        r'\mathbf{V}_{\text{out}} = V_{\text{CC}} + G_{\text{CA}} \times V_{\text{pico}}',
                                     additional:
-                                        'Critério: 0 ≤ V_out ≤ 5V para compatibilidade com ADC.',
+                                        'Critério: 0 ≤ Vout ≤ 5V para compatibilidade com ADC.',
                                     additionalColor: Colors.green,
                                   ),
                                 ),

@@ -22,7 +22,22 @@ class SlidesApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const PresentationScreen(),
+      initialRoute: '/1',
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '/1';
+        // Parse slide number from URL: /1 .. /17
+        final seg = Uri.parse(name).pathSegments;
+        int slide = 0;
+        if (seg.isNotEmpty) {
+          slide = (int.tryParse(seg.first) ?? 1).clamp(1, kTotalSlides) - 1;
+        }
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              PresentationScreen(initialSlide: slide),
+          transitionDuration: Duration.zero,
+        );
+      },
     );
   }
 }

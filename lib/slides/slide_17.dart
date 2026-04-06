@@ -18,25 +18,18 @@ external JSPromise<JSAny?> _runPythonCode(JSString code);
 @JS('getPyResult')
 external JSString? _getPyResult();
 
-@JS('localStorage.getItem')
-external JSString? _lsGet(JSString key);
-
-@JS('localStorage.setItem')
-external void _lsSet(JSString key, JSString value);
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Slide 16 — Python Interativo (Pyodide)
-// Permite executar código Python diretamente no browser.
+// Slide 17 — Python Interativo (Pyodide) — Gráfico Cos/Sin
 // ─────────────────────────────────────────────────────────────────────────────
 
-class Slide16 extends StatefulWidget {
-  const Slide16({super.key});
+class Slide17 extends StatefulWidget {
+  const Slide17({super.key});
 
   @override
-  State<Slide16> createState() => _Slide16State();
+  State<Slide17> createState() => _Slide17State();
 }
 
-class _Slide16State extends State<Slide16> with SingleTickerProviderStateMixin {
+class _Slide17State extends State<Slide17> with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
   late final CodeController _codeCtrl;
   late final ScrollController _outputScroll;
@@ -50,113 +43,19 @@ class _Slide16State extends State<Slide16> with SingleTickerProviderStateMixin {
   bool _outputFullscreen = false;
   String _output = '';
 
-  // ── Código pré-carregado (notebook 05_projeto_condicionador_sinais) ────────
-  static const _sample = r'''# ──────────────────────────────
-# Condicionador de Sinais — Busca Monte Carlo
-# Encontra combinações de resistores comerciais (Série E24)
-# que adaptam 220 V AC para a faixa de 0–5 V.
-# ──────────────────────────────
-import math
-import random
-import pandas as pd
+  // ── Código pré-carregado ──────────────────────────────────────────────────
+  static const _sample = r'''from numpy import cos, sin, pi, arange
+from pylab import show, figure, plot, title, legend
 
-random.seed(42)
-
-# ── 1) Parâmetros do problema ──────────────────
-saida_desejada = [5.0, 0.0]
-entrada_rms = 220.0
-max_tentativas = 8000
-
-print(f"Saída desejada: {saida_desejada[1]} V a {saida_desejada[0]} V")
-print(f"Entrada RMS   : {entrada_rms} V")
-print(f"Max tentativas: {max_tentativas}")
-
-# ── 2) Preparação do sinal de entrada ─────────────────
-if isinstance(entrada_rms, (int, float)):
-    entrada_rms = [entrada_rms, -entrada_rms]
-
-entrada_pico = [v * math.sqrt(2) for v in entrada_rms]
-print(f"Entrada pico  : {entrada_pico[0]:.2f} V  /  {entrada_pico[1]:.2f} V")
-
-# ── 3) Resistores comerciais (Série E24) ──────────────────
-valores_base = [10, 11, 12, 13, 15, 16, 18, 20, 22, 24, 27,
-                30, 33, 36, 39, 43, 47, 51, 56, 62, 68, 75, 82]
-decadas = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
-resistores_comerciais = [b * d for b in valores_base for d in decadas]
-print(f"Resistores disponíveis: {len(resistores_comerciais)}")
-
-# ── 4) Funções auxiliares ────────────────────
-def paralelo(r1, r2):
-    return (r1 * r2) / (r1 + r2)
-
-def calcular_ganho_ca_real(r1, r2, r3):
-    r1r2 = paralelo(r1, r2)
-    return r1r2 / (r3 + r1r2)
-
-def calcular_offset_cc(r1, r2, r3, tensao_cc):
-    r3r2 = paralelo(r3, r2)
-    return (r3r2 / (r1 + r3r2)) * tensao_cc
-
-def calcular_ganho_ca_ideal(tensao_cc, tensao_ca_pico):
-    return (tensao_cc / 2.0) / tensao_ca_pico
-
-def calcular_saida_final(valor_cc, ganho_ca, ent_pico):
-    return [valor_cc + ganho_ca * ent_pico[0],
-            valor_cc + ganho_ca * ent_pico[1]]
-
-def circuito_valido(r1, r2, r3, ganho_real, gca_ideal, vout, saida_des):
-    return (
-        r3 < 500_000 and
-        max(saida_des) / (r1 + r2) < 0.001 and
-        ganho_real <= gca_ideal and
-        max(vout) >= 0.90 * max(saida_des) and
-        min(vout) >= 0.04 * min(saida_des)
-    )
-
-# ── 5) Ganho CA ideal ─────────────────────
-ganho_ca_ideal = calcular_ganho_ca_ideal(
-    tensao_cc=max(saida_desejada),
-    tensao_ca_pico=max(entrada_pico)
-)
-print(f"Ganho CA ideal: {ganho_ca_ideal:.6f}")
-
-# ── 6) Busca aleatória (Monte Carlo) ───────────────
-circuitos = []
-registrados = set()
-
-for _ in range(max_tentativas):
-    r1 = random.choice(resistores_comerciais)
-    r2 = r1
-    r3 = random.choice(resistores_comerciais)
-
-    ganho_real = calcular_ganho_ca_real(r1, r2, r3)
-    valor_cc   = calcular_offset_cc(r1, r2, r3, saida_desejada[0])
-    vout       = calcular_saida_final(valor_cc, ganho_real, entrada_pico)
-
-    if circuito_valido(r1, r2, r3, ganho_real, ganho_ca_ideal, vout, saida_desejada):
-        chave = (float(r1), float(r2), float(r3))
-        if chave not in registrados:
-            registrados.add(chave)
-            circuitos.append({
-                "r1_ohm": r1, "r2_ohm": r2, "r3_ohm": r3,
-                "vout_max_v": max(vout), "vout_min_v": min(vout),
-                "ganho_ca": ganho_real, "offset_cc_v": valor_cc,
-            })
-
-print(f"Circuitos válidos: {len(circuitos)}")
-
-# ── 7) Resultados ───────────────────────
-df = pd.DataFrame(circuitos)
-
-if df.empty:
-    print("Nenhum circuito válido encontrado.")
-else:
-    df = df.sort_values(
-        by=["vout_max_v", "vout_min_v"], ascending=[False, False]
-    ).reset_index(drop=True)
-    df.index = df.index + 1
-    df.index.name = "opcao"
-    print(df.round(6).to_string())
+T:int = 20.0
+t = arange(0,100,0.1)
+y1 = cos((2*pi*(1/T))*t)
+y2 = sin(2*pi*(1/T)*t)
+figure(1)
+line1,line2 = plot(t,y1,'b',t,y2,'r')
+title("Aula 01 de Instrumentação Industrial")
+legend([line1,line2], ["COS","SIN"])
+show()
 ''';
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -168,19 +67,13 @@ else:
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..forward();
-    final saved = _lsGet('slide16_code'.toJS)?.toDart;
-    _codeCtrl = CodeController(
-      text: saved ?? _sample,
-      language: python,
-    );
+    _codeCtrl = CodeController(text: _sample, language: python);
     _outputScroll = ScrollController();
     _startPyodidePoll();
   }
 
   void _startPyodidePoll() {
-    // Check immediately in case already loaded
     _checkReady();
-    // Then poll every second
     _pollTimer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => _checkReady(),
@@ -194,9 +87,7 @@ else:
         setState(() => _pyodideReady = true);
         _pollTimer?.cancel();
       }
-    } catch (_) {
-      // JS not available (e.g. non-web platform)
-    }
+    } catch (_) {}
   }
 
   @override
@@ -239,17 +130,13 @@ else:
       _hasOutput = false;
     });
 
-    // Persist current code so it survives page reloads
-    _lsSet('slide16_code'.toJS, _codeCtrl.fullText.toJS);
-
-    // Let Flutter redraw the "Executando..." state before blocking
     await Future.delayed(const Duration(milliseconds: 60));
 
     try {
-      // Await the async JS work (loads packages + runs code)
       await _runPythonCode(_codeCtrl.fullText.toJS).toDart;
-      // Result is stored in window._pyResult — read it synchronously
-      final raw = _getPyResult()?.toDart ?? '{"success":false,"output":"Sem resultado"}';
+      final raw =
+          _getPyResult()?.toDart ??
+          '{"success":false,"output":"Sem resultado"}';
       final Map<String, dynamic> json = jsonDecode(raw);
       final output = json['output'] as String? ?? '';
       final success = json['success'] as bool? ?? false;
@@ -261,7 +148,6 @@ else:
           _hasOutput = true;
           _output = output;
         });
-        // Scroll output to bottom
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_outputScroll.hasClients) {
             _outputScroll.animateTo(
@@ -317,7 +203,6 @@ else:
                   ],
                 ),
               ),
-              // ── Fullscreen editor overlay ───────────────────────────────
               if (_editorFullscreen)
                 Positioned.fill(
                   child: DecoratedBox(
@@ -338,14 +223,17 @@ else:
                         CustomPaint(painter: _DotGrid(s: s)),
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                              36 * s, 22 * s, 36 * s, 14 * s),
+                            36 * s,
+                            22 * s,
+                            36 * s,
+                            14 * s,
+                          ),
                           child: _buildEditor(s),
                         ),
                       ],
                     ),
                   ),
                 ),
-              // ── Fullscreen output overlay ───────────────────────────────
               if (_outputFullscreen)
                 Positioned.fill(
                   child: DecoratedBox(
@@ -366,7 +254,11 @@ else:
                         CustomPaint(painter: _DotGrid(s: s)),
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                              36 * s, 22 * s, 36 * s, 14 * s),
+                            36 * s,
+                            22 * s,
+                            36 * s,
+                            14 * s,
+                          ),
                           child: _buildOutput(s),
                         ),
                       ],
@@ -438,7 +330,6 @@ else:
           ],
         ),
         const Spacer(),
-        // Status badge
         AnimatedContainer(
           duration: const Duration(milliseconds: 500),
           padding: EdgeInsets.symmetric(horizontal: 14 * s, vertical: 7 * s),
@@ -523,10 +414,14 @@ else:
                     size: 14 * s,
                   ),
                   tooltip: 'Copiar código',
-                  onPressed: () =>
-                      Clipboard.setData(ClipboardData(text: _codeCtrl.fullText)),
+                  onPressed: () => Clipboard.setData(
+                    ClipboardData(text: _codeCtrl.fullText),
+                  ),
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(minWidth: 26 * s, minHeight: 26 * s),
+                  constraints: BoxConstraints(
+                    minWidth: 26 * s,
+                    minHeight: 26 * s,
+                  ),
                 ),
                 IconButton(
                   icon: Icon(
@@ -536,16 +431,20 @@ else:
                     color: Colors.white54,
                     size: 16 * s,
                   ),
-                  tooltip: _editorFullscreen ? 'Restaurar tamanho' : 'Expandir editor',
+                  tooltip: _editorFullscreen
+                      ? 'Restaurar tamanho'
+                      : 'Expandir editor',
                   onPressed: () =>
                       setState(() => _editorFullscreen = !_editorFullscreen),
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(minWidth: 26 * s, minHeight: 26 * s),
+                  constraints: BoxConstraints(
+                    minWidth: 26 * s,
+                    minHeight: 26 * s,
+                  ),
                 ),
               ],
             ),
           ),
-          // Code editor with Python syntax highlighting (VS Code dark theme)
           Expanded(
             child: CodeTheme(
               data: CodeThemeData(styles: vs2015Theme),
@@ -569,7 +468,6 @@ else:
               ),
             ),
           ),
-          // Run button
           Padding(
             padding: EdgeInsets.fromLTRB(14 * s, 0, 14 * s, 14 * s),
             child: _buildRunButton(s),
@@ -694,11 +592,16 @@ else:
                     color: Colors.white54,
                     size: 16 * s,
                   ),
-                  tooltip: _outputFullscreen ? 'Restaurar tamanho' : 'Expandir saída',
+                  tooltip: _outputFullscreen
+                      ? 'Restaurar tamanho'
+                      : 'Expandir saída',
                   onPressed: () =>
                       setState(() => _outputFullscreen = !_outputFullscreen),
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(minWidth: 26 * s, minHeight: 26 * s),
+                  constraints: BoxConstraints(
+                    minWidth: 26 * s,
+                    minHeight: 26 * s,
+                  ),
                 ),
               ],
             ),

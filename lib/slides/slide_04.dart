@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 
 class Slide04 extends StatefulWidget {
   final int step;
@@ -77,7 +78,7 @@ class _Slide04State extends State<Slide04> with TickerProviderStateMixin {
 
   Widget _formulaBox({
     required double s,
-    required String text,
+    required String latex,
     required Color color,
     double? fontSize,
   }) {
@@ -89,13 +90,10 @@ class _Slide04State extends State<Slide04> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(8 * s),
         border: Border.all(color: color.withValues(alpha: 0.45)),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: (fontSize ?? 14) * s,
-          fontFamily: 'monospace',
-          fontWeight: FontWeight.w600,
+      child: Center(
+        child: Math.tex(
+          latex,
+          textStyle: TextStyle(color: color, fontSize: (fontSize ?? 18) * s),
         ),
       ),
     );
@@ -195,7 +193,8 @@ class _Slide04State extends State<Slide04> with TickerProviderStateMixin {
                         SizedBox(height: 12 * s),
                         _formulaBox(
                           s: s,
-                          text: 'V_pico = V_RMS × √2',
+                          latex:
+                              r'\mathbf{V}_{\text{pico}} = \mathbf{V}_{\text{RMS}} \times \sqrt{2}',
                           color: teal,
                         ),
                         SizedBox(height: 12 * s),
@@ -210,9 +209,10 @@ class _Slide04State extends State<Slide04> with TickerProviderStateMixin {
                         SizedBox(height: 8 * s),
                         _formulaBox(
                           s: s,
-                          text: 'V_pico ≈ 311,13 V',
+                          latex:
+                              r'\mathbf{V}_{\text{pico}} \approx 311{,}13 \text{ V}',
                           color: orange,
-                          fontSize: 18,
+                          fontSize: 22,
                         ),
                       ],
                     ),

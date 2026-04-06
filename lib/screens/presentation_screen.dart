@@ -20,8 +20,9 @@ import '../slides/slide_13.dart';
 import '../slides/slide_14.dart';
 import '../slides/slide_15.dart';
 import '../slides/slide_16.dart';
+import '../slides/slide_17.dart';
 
-const int _kTotal = 16;
+const int kTotalSlides = 17;
 
 // Accent colors cycling per slide
 const _kAccents = [
@@ -48,40 +49,42 @@ const _kGlowPositions = [
   Alignment.bottomLeft,
   Alignment.topCenter,
   Alignment.centerRight,
-  Alignment.bottomCenter,   // 14
-  Alignment.centerRight,    // 15
+  Alignment.bottomCenter, // 14
+  Alignment.centerRight, // 15
 ];
 
 class PresentationScreen extends StatefulWidget {
-  const PresentationScreen({super.key});
+  final int initialSlide;
+  const PresentationScreen({super.key, this.initialSlide = 0});
   @override
   State<PresentationScreen> createState() => _PresentationScreenState();
 }
 
 // Max sub-steps per slide index (0 = no sub-steps).
+// Ordem: 0=Slide01, 1=Slide17(Python-cos/sin), 2=Slide02, 3=Slide03, ...
 int _maxSubStep(int slide) {
   const steps = {
-    1: 5,  // Cadeia de Medição
-    2: 3,  // Contexto do Problema
-    3: 3,  // Formulação do Problema
-    4: 2,  // Esquemático
-    5: 4,  // Derivação Matemática
-    6: 4,  // Estratégia Computacional
-    7: 0,  // Fluxograma
-    8: 3,  // Arquitetura do Software
-    9: 2,  // Série E24
-    10: 2, // Implementação Python
-    11: 2, // Funções Auxiliares
-    12: 2, // Busca Aleatória
-    13: 2, // Análise Resultados
-    14: 2, // Segurança Elétrica
+    2: 5, // Cadeia de Medição  (era slide 2, agora index 2)
+    3: 3, // Contexto do Problema
+    4: 3, // Formulação do Problema
+    5: 2, // Esquemático
+    6: 4, // Derivação Matemática
+    7: 4, // Estratégia Computacional
+    8: 0, // Fluxograma
+    9: 3, // Arquitetura do Software
+    10: 2, // Série E24
+    11: 2, // Implementação Python
+    12: 2, // Funções Auxiliares
+    13: 2, // Busca Aleatória
+    14: 2, // Análise Resultados
+    15: 2, // Segurança Elétrica
   };
   return steps[slide] ?? 0;
 }
 
 class _PresentationScreenState extends State<PresentationScreen>
     with TickerProviderStateMixin {
-  int _slide = 0;
+  late int _slide;
   int _subStep = 0; // current sub-step within _slide (0 = no blocks shown yet)
   bool _forward = true;
   bool _isFS = false;
@@ -98,6 +101,7 @@ class _PresentationScreenState extends State<PresentationScreen>
   @override
   void initState() {
     super.initState();
+    _slide = widget.initialSlide;
 
     _glowCtrl = AnimationController(
       vsync: this,
@@ -156,7 +160,7 @@ class _PresentationScreenState extends State<PresentationScreen>
   }
 
   void _goToSlide(int idx, {required bool forward}) {
-    if (idx < 0 || idx >= _kTotal) return;
+    if (idx < 0 || idx >= kTotalSlides) return;
     setState(() {
       _forward = forward;
       _slide = idx;
@@ -165,11 +169,19 @@ class _PresentationScreenState extends State<PresentationScreen>
       _subStep = forward ? 0 : _maxSubStep(idx);
     });
     _restartSlideAnims();
+    // Update URL to reflect current slide number (1-based)
+    _updateUrl(idx);
+  }
+
+  void _updateUrl(int idx) {
+    final uri = '/${idx + 1}';
+    // Use replaceRoute so back-button isn't polluted
+    Navigator.of(context).pushReplacementNamed(uri);
   }
 
   // Jump from dots/external — treat as forward if idx > _slide
   void _goTo(int idx) {
-    if (idx < 0 || idx >= _kTotal || idx == _slide) return;
+    if (idx < 0 || idx >= kTotalSlides || idx == _slide) return;
     _goToSlide(idx, forward: idx > _slide);
   }
 
@@ -272,7 +284,7 @@ class _PresentationScreenState extends State<PresentationScreen>
               bottom: 0,
               child: BottomNavBar(
                 currentSlide: _slide,
-                totalSlides: _kTotal,
+                totalSlides: kTotalSlides,
                 onPrev: _handlePrev,
                 onNext: _handleNext,
                 onJump: _goTo,
@@ -516,7 +528,7 @@ class _PresentationScreenState extends State<PresentationScreen>
             offset: Offset(-20 * (1 - t), 0),
             child: _SlideBadge(
               current: _slide + 1,
-              total: _kTotal,
+              total: kTotalSlides,
               accent: _accent,
             ),
           ),
@@ -542,23 +554,24 @@ class _SlideFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Slides 0–14 are full-Flutter widgets — fill the entire available area
+    // Slide 1 = capa, Slide 2 = Python cos/sin (Slide17), depois restantes
     if (slideIndex == 0) return const Slide01();
-    if (slideIndex == 1) return Slide02(step: subStep);
-    if (slideIndex == 2) return Slide03(step: subStep);
-    if (slideIndex == 3) return Slide04(step: subStep);
-    if (slideIndex == 4) return Slide05(step: subStep);
-    if (slideIndex == 5) return Slide06(step: subStep);
-    if (slideIndex == 6) return Slide07(step: subStep);
-    if (slideIndex == 7) return Slide08(step: subStep);
-    if (slideIndex == 8) return Slide09(step: subStep);
-    if (slideIndex == 9) return Slide10(step: subStep);
-    if (slideIndex == 10) return Slide11(step: subStep);
-    if (slideIndex == 11) return Slide12(step: subStep);
-    if (slideIndex == 12) return Slide13(step: subStep);
-    if (slideIndex == 13) return Slide14(step: subStep);
-    if (slideIndex == 14) return Slide15(step: subStep);
-    if (slideIndex == 15) return const Slide16();
+    if (slideIndex == 1) return const Slide17(); // Python cos/sin
+    if (slideIndex == 2) return Slide02(step: subStep);
+    if (slideIndex == 3) return Slide03(step: subStep);
+    if (slideIndex == 4) return Slide04(step: subStep);
+    if (slideIndex == 5) return Slide05(step: subStep);
+    if (slideIndex == 6) return Slide06(step: subStep);
+    if (slideIndex == 7) return Slide07(step: subStep);
+    if (slideIndex == 8) return Slide08(step: subStep);
+    if (slideIndex == 9) return Slide09(step: subStep);
+    if (slideIndex == 10) return Slide10(step: subStep);
+    if (slideIndex == 11) return Slide11(step: subStep);
+    if (slideIndex == 12) return Slide12(step: subStep);
+    if (slideIndex == 13) return Slide13(step: subStep);
+    if (slideIndex == 14) return Slide14(step: subStep);
+    if (slideIndex == 15) return Slide15(step: subStep);
+    if (slideIndex == 16) return const Slide16();
 
     final path =
         'assets/pdf_slide_${(slideIndex + 1).toString().padLeft(2, '0')}.png';
@@ -674,7 +687,10 @@ class _Corner extends StatelessWidget {
     return Transform(
       alignment: Alignment.center,
       transform: Matrix4.diagonal3Values(
-          flipX ? -1.0 : 1.0, flipY ? -1.0 : 1.0, 1.0),
+        flipX ? -1.0 : 1.0,
+        flipY ? -1.0 : 1.0,
+        1.0,
+      ),
       child: SizedBox(
         width: len,
         height: len,
