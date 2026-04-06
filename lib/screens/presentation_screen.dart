@@ -33,24 +33,25 @@ const _kAccents = [
   Color(0xFFFF9F0A), // orange
 ];
 
-// Glow alignment positions per slide index
+// Glow alignment positions per slide index (must have >= kTotalSlides entries)
 const _kGlowPositions = [
-  Alignment.topLeft,
-  Alignment.topRight,
-  Alignment.bottomRight,
-  Alignment.bottomLeft,
-  Alignment.topCenter,
-  Alignment.centerRight,
-  Alignment.bottomCenter,
-  Alignment.centerLeft,
-  Alignment.topLeft,
-  Alignment.topRight,
-  Alignment.bottomRight,
-  Alignment.bottomLeft,
-  Alignment.topCenter,
-  Alignment.centerRight,
+  Alignment.topLeft, // 0
+  Alignment.topRight, // 1
+  Alignment.bottomRight, // 2
+  Alignment.bottomLeft, // 3
+  Alignment.topCenter, // 4
+  Alignment.centerRight, // 5
+  Alignment.bottomCenter, // 6
+  Alignment.centerLeft, // 7
+  Alignment.topLeft, // 8
+  Alignment.topRight, // 9
+  Alignment.bottomRight, // 10
+  Alignment.bottomLeft, // 11
+  Alignment.topCenter, // 12
+  Alignment.centerRight, // 13
   Alignment.bottomCenter, // 14
   Alignment.centerRight, // 15
+  Alignment.topLeft, // 16 — Slide17 (Python)
 ];
 
 class PresentationScreen extends StatefulWidget {
@@ -61,7 +62,7 @@ class PresentationScreen extends StatefulWidget {
 }
 
 // Max sub-steps per slide index (0 = no sub-steps).
-// Ordem: 0=Slide01, 1=Slide17(Python-cos/sin), 2=Slide02, 3=Slide03, ...
+// Ordem: 0=Slide01, 1=Slide02, 2=Slide03, ...
 int _maxSubStep(int slide) {
   const steps = {
     1: 5, // Cadeia de Medição
@@ -571,7 +572,6 @@ class _SlideFrame extends StatelessWidget {
     if (slideIndex == 14) return Slide15(step: subStep);
     if (slideIndex == 15) return const Slide16();
     if (slideIndex == 16) return const Slide17(); // Python interativo (último)
-
     final path =
         'assets/pdf_slide_${(slideIndex + 1).toString().padLeft(2, '0')}.png';
 
