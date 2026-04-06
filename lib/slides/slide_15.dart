@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
-class Slide14 extends StatefulWidget {
+class Slide15 extends StatefulWidget {
   final int step;
-  const Slide14({super.key, required this.step});
+  const Slide15({super.key, required this.step});
 
   @override
-  State<Slide14> createState() => _Slide14State();
+  State<Slide15> createState() => _Slide15State();
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-class _Slide14State extends State<Slide14> with TickerProviderStateMixin {
+class _Slide15State extends State<Slide15> with TickerProviderStateMixin {
   late final AnimationController _entry;
   late final AnimationController _osc;
 

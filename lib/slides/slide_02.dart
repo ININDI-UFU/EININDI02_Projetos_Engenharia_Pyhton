@@ -19,17 +19,17 @@ external JSPromise<JSAny?> _runPythonCode(JSString code);
 external JSString? _getPyResult();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Slide 17 — Python Interativo (Pyodide) — Gráfico Cos/Sin
+// Slide 02 — Python Interativo (Pyodide) — Gráfico Cos/Sin
 // ─────────────────────────────────────────────────────────────────────────────
 
-class Slide17 extends StatefulWidget {
-  const Slide17({super.key});
+class Slide02 extends StatefulWidget {
+  const Slide02({super.key});
 
   @override
-  State<Slide17> createState() => _Slide17State();
+  State<Slide02> createState() => _Slide02State();
 }
 
-class _Slide17State extends State<Slide17> with SingleTickerProviderStateMixin {
+class _Slide02State extends State<Slide02> with SingleTickerProviderStateMixin {
   late final AnimationController _entry;
   late final CodeController _codeCtrl;
   late final ScrollController _outputScroll;
