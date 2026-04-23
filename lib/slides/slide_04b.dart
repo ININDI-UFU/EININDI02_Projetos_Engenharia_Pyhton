@@ -365,7 +365,7 @@ class _Slide04bState extends State<Slide04b> with TickerProviderStateMixin {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: const Color(0xFFFF9F0A),
-              fontSize: 10.3 * s,
+              fontSize: 9.5 * s,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
             ),
@@ -414,14 +414,8 @@ class _Slide04bState extends State<Slide04b> with TickerProviderStateMixin {
       runSpacing: 8 * s,
       children: [
         chip(const Color(0xFF00FF41), 'Forma de onda preservada (mesma fase)'),
-        chip(
-          const Color(0xFFFF9F0A),
-          'Escala da saída em destaque · offset CC = 2,5 V',
-        ),
-        chip(
-          const Color(0xFF64D2FF),
-          'Zero ao centro nos dois osciloscópios → o offset fica evidente',
-        ),
+        chip(const Color(0xFFFF9F0A), 'Escala da saída com offset CC = 2,5 V'),
+        chip(const Color(0xFF64D2FF), 'Amplitude condicionada entre 0 a 5 V'),
       ],
     );
   }
